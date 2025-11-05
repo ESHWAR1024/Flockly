@@ -1,6 +1,10 @@
 import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { User, Edit2 } from 'lucide-react';
 
 export default function FlocklyHome() {
+    const [showProfile, setShowProfile] = useState(false);
+
     const events = [
         { name: 'Hackathon 2025', price: '₹299', percent: 80 },
         { name: 'Concert Vibes', price: '₹499', percent: 60 },
@@ -19,10 +23,51 @@ export default function FlocklyHome() {
                 </div>
 
                 {/* Navbar */}
-                <nav className="flex space-x-8 text-lg uppercase tracking-wide">
+                <nav className="flex items-center space-x-8 text-lg uppercase tracking-wide">
                     <a href="#" className="hover:text-gray-400 transition">Home</a>
                     <a href="#" className="hover:text-gray-400 transition">Events</a>
                     <a href="#" className="hover:text-gray-400 transition">Contact</a>
+
+                    {/* Profile Icon */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowProfile(!showProfile)}
+                            className="p-2 rounded-full bg-white text-black hover:bg-gray-200 transition"
+                        >
+                            <User size={24} />
+                        </button>
+
+                        {/* Profile Card Dropdown */}
+                        {showProfile && (
+                            <div className="absolute right-0 mt-2 w-64 z-50">
+                                <div className="rounded-xl border bg-white text-black shadow-lg">
+                                    <div className="p-6">
+                                        <div className="flex flex-col items-center space-y-4">
+                                            <div className="relative">
+                                                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                                                    <User size={32} className="text-gray-600" />
+                                                </div>
+                                                <button className="absolute bottom-0 right-0 bg-black text-white p-1.5 rounded-full hover:bg-gray-800 transition">
+                                                    <Edit2 size={14} />
+                                                </button>
+                                            </div>
+                                            <div className="text-center flex items-center gap-2">
+                                                <h3 className="font-bold text-lg">User Name</h3>
+                                                <button className="text-gray-600 hover:text-black transition">
+                                                    <Edit2 size={16} />
+                                                </button>
+                                            </div>
+                                            <p className="text-sm text-gray-600">user@example.com</p>
+
+                                            <button className="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition">
+                                                Logout
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </nav>
             </div>
 
