@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-// ✅ Simple Tailwind-only Card and Button Components
 const Card = ({ children, className = "" }) => (
   <div className={`rounded-2xl border border-gray-300 shadow-xl bg-black text-white ${className}`}>
     {children}
@@ -11,18 +10,20 @@ const CardContent = ({ children, className = "" }) => (
   <div className={`p-8 ${className}`}>{children}</div>
 );
 
-const Button = ({ children, onClick, type = "button", className = "" }) => (
+const Button = ({ children, onClick, type = "button", className = "", disabled = false }) => (
   <button
     type={type}
     onClick={onClick}
-    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-200 focus:outline-none ${className}`}
+    disabled={disabled}
+    className={`px-4 py-3 rounded-xl font-semibold transition-all duration-200 focus:outline-none ${
+      disabled ? 'opacity-50 cursor-not-allowed' : ''
+    } ${className}`}
   >
     {children}
   </button>
 );
 
-export default function CreateEvent({ onCancel }) 
- {
+export default function CreateEvent({ onCancel, onEventCreated }) {
   const [formData, setFormData] = useState({
     eventName: "",
     description: "",
@@ -40,6 +41,7 @@ export default function CreateEvent({ onCancel })
   const [customFields, setCustomFields] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [newField, setNewField] = useState({ name: "", type: "text" });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -68,15 +70,59 @@ export default function CreateEvent({ onCancel })
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Event Created:", formData);
-    alert("Event Created Successfully!");
-  };
+    setLoading(true);
 
-  const handleCancel = () => {
-    if (window.confirm("Are you sure you want to cancel?")) {
-      window.history.back();
+    try {
+      // Prepare custom fields data
+      const customFieldsData = {};
+      customFields.forEach(field => {
+        customFieldsData[field.name] = formData[field.name];
+      });
+
+      // Prepare event data
+      const eventData = {
+        eventName: formData.eventName,
+        description: formData.description,
+        image: formData.image,
+        price: parseFloat(formData.price),
+        lastDate: formData.lastDate,
+        eventDate: formData.eventDate,
+        eventTime: formData.eventTime,
+        capacity: parseInt(formData.capacity),
+        venue: formData.venue,
+        contact: formData.contact,
+        customFields: customFieldsData
+      };
+
+      const response = await fetch('http://localhost:5000/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(eventData)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert("Event Created Successfully!");
+        if (onEventCreated) {
+          onEventCreated(data.event);
+        }
+        if (onCancel) {
+          onCancel();
+        }
+      } else {
+        alert(`Failed to create event: ${data.message}`);
+      }
+    } catch (error) {
+      console.error('Error creating event:', error);
+      alert('Failed to create event. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -112,7 +158,6 @@ export default function CreateEvent({ onCancel })
                 </div>
               )}
 
-              {/* Venue Field */}
               <div className="w-full mb-4">
                 <label className="block text-lg font-semibold mb-2">
                   Venue
@@ -128,7 +173,6 @@ export default function CreateEvent({ onCancel })
                 />
               </div>
 
-              {/* Contact Field */}
               <div className="w-full mb-4">
                 <label className="block text-lg font-semibold mb-2">
                   Contact
@@ -144,7 +188,6 @@ export default function CreateEvent({ onCancel })
                 />
               </div>
 
-              {/* Add Custom Field Button */}
               <Button
                 type="button"
                 onClick={handleAddCustomField}
@@ -159,7 +202,6 @@ export default function CreateEvent({ onCancel })
               onSubmit={handleSubmit}
               className="flex flex-col gap-6 w-full md:w-1/2"
             >
-              {/* Event Name */}
               <div>
                 <label className="block text-lg font-semibold mb-2">
                   Event Name
@@ -175,7 +217,6 @@ export default function CreateEvent({ onCancel })
                 />
               </div>
 
-              {/* Description */}
               <div>
                 <label className="block text-lg font-semibold mb-2">
                   Description
@@ -191,7 +232,6 @@ export default function CreateEvent({ onCancel })
                 />
               </div>
 
-              {/* Price, Event Date, and Event Time */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-lg font-semibold mb-2">
@@ -237,7 +277,6 @@ export default function CreateEvent({ onCancel })
                 </div>
               </div>
 
-              {/* Last Date & Capacity */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-lg font-semibold mb-2">
@@ -269,7 +308,6 @@ export default function CreateEvent({ onCancel })
                 </div>
               </div>
 
-              {/* Custom Fields Render */}
               {customFields.map((field, index) => (
                 <div key={index}>
                   <label className="block text-lg font-semibold mb-2">
@@ -286,36 +324,34 @@ export default function CreateEvent({ onCancel })
                 </div>
               ))}
 
-              {/* Buttons */}
               <Button
                 type="submit"
+                disabled={loading}
                 className="mt-6 w-full bg-white text-black font-bold hover:bg-gray-200"
               >
-                Create Event
+                {loading ? 'Creating Event...' : 'Create Event'}
               </Button>
 
               <Button
-  type="button"
-  onClick={() => {
-    if (window.confirm("Are you sure you want to cancel?")) {
-      if (typeof onCancel === "function") {
-        onCancel(); // 👈 go back to Manager Home page
-      } else {
-        window.history.back(); // fallback if used standalone
-      }
-    }
-  }}
-  className="mt-4 w-full bg-red-500 text-black font-bold hover:bg-red-600"
->
-  Cancel
-</Button>
-
+                type="button"
+                onClick={() => {
+                  if (window.confirm("Are you sure you want to cancel?")) {
+                    if (typeof onCancel === "function") {
+                      onCancel();
+                    } else {
+                      window.history.back();
+                    }
+                  }
+                }}
+                className="mt-4 w-full bg-red-500 text-black font-bold hover:bg-red-600"
+              >
+                Cancel
+              </Button>
             </form>
           </div>
         </CardContent>
       </Card>
 
-      {/* Popup for custom field creation */}
       {showPopup && (
         <div className="absolute inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
           <div className="bg-white text-black rounded-2xl p-6 w-96 shadow-xl">
