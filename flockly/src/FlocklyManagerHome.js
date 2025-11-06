@@ -16,7 +16,7 @@ export default function FlocklyManagerHome() {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:5000/api/events", {
+      const response = await fetch("http://localhost:5000/api/events/manager", {
         credentials: "include",
       });
 
