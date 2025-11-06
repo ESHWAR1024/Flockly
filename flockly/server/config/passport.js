@@ -7,9 +7,10 @@ module.exports = function(passport) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: '/auth/google/callback'
+        callbackURL: '/auth/google/callback',
+        passReqToCallback: true
       },
-      async (accessToken, refreshToken, profile, done) => {
+      async (req, accessToken, refreshToken, profile, done) => {
         try {
           console.log('Google Profile:', profile); // Debug log
           
@@ -26,14 +27,19 @@ module.exports = function(passport) {
             ? profile.photos[0].value 
             : null;
           
+          // Get userType from session (set during /auth/google call)
+          const userType = req.session.userType || 'user';
+          console.log('🟡 Creating user with userType:', userType);
+          
           user = await User.create({
             googleId: profile.id,
             email: profile.emails[0].value,
             name: profile.displayName,
-            profilePicture: profilePicture
+            profilePicture: profilePicture,
+            userType: userType
           });
 
-          console.log('Created user:', user); // Debug log
+          console.log('✅ Created user:', user); // Debug log
           done(null, user);
         } catch (error) {
           console.error('Error in Google Strategy:', error);

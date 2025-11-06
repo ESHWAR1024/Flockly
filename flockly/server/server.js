@@ -47,7 +47,9 @@ app.get(
   '/auth/google',
   (req, res, next) => {
     // Store userType in session before redirecting to Google
-    req.session.userType = req.query.userType || 'user';
+    const userType = req.query.userType || 'user';
+    req.session.userType = userType;
+    console.log('🔵 Storing userType in session:', userType);
     next();
   },
   passport.authenticate('google', { scope: ['profile', 'email'] })
@@ -58,15 +60,19 @@ app.get(
   passport.authenticate('google', { failureRedirect: '/login' }),
   async (req, res) => {
     try {
+      console.log('🟢 Callback - Session userType:', req.session.userType);
+      console.log('🟢 Callback - User before update:', req.user.userType);
+
       // Update user type if provided
       if (req.session.userType) {
         req.user.userType = req.session.userType;
         await req.user.save();
+        console.log('✅ User type updated to:', req.user.userType);
       }
       // Redirect to frontend with success
       res.redirect(`${process.env.CLIENT_URL}?auth=success&userType=${req.user.userType}`);
     } catch (error) {
-      console.error('Callback error:', error);
+      console.error('❌ Callback error:', error);
       res.redirect(`${process.env.CLIENT_URL}?auth=error`);
     }
   }
