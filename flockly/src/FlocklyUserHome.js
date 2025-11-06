@@ -54,9 +54,9 @@ export default function FlocklyHome() {
                             className="rounded-full hover:opacity-80 transition"
                         >
                             {user?.profilePicture ? (
-                                <img 
-                                    src={user.profilePicture} 
-                                    alt="Profile" 
+                                <img
+                                    src={user.profilePicture}
+                                    alt="Profile"
                                     className="w-10 h-10 rounded-full object-cover border-2 border-white"
                                 />
                             ) : (
@@ -73,15 +73,16 @@ export default function FlocklyHome() {
                                     <div className="p-6">
                                         <div className="flex flex-col items-center space-y-4">
                                             <div className="relative">
-                                                {user?.profilePicture ? (
-                                                    <img 
-                                                        src={user.profilePicture} 
-                                                        alt="Profile" 
-                                                        className="w-16 h-16 rounded-full object-cover"
+                                                {user && user.profilePicture && user.profilePicture.length > 0 ? (
+                                                    <img
+                                                        src={user.profilePicture}
+                                                        alt={user.name || 'Profile'}
+                                                        className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+                                                        referrerPolicy="no-referrer"
                                                     />
                                                 ) : (
-                                                    <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-                                                        <User size={32} className="text-gray-600" />
+                                                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl">
+                                                        {getInitials(user?.name)}
                                                     </div>
                                                 )}
                                                 <button className="absolute bottom-0 right-0 bg-black text-white p-1.5 rounded-full hover:bg-gray-800 transition">
@@ -96,7 +97,7 @@ export default function FlocklyHome() {
                                             </div>
                                             <p className="text-sm text-gray-600">{user?.email || 'user@example.com'}</p>
 
-                                            <button 
+                                            <button
                                                 onClick={handleLogout}
                                                 className="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
                                             >
