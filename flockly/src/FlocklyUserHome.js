@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { User, Edit2 } from "lucide-react";
 import { authService } from "./services/api";
 
-export default function FlocklyHome() {
+export default function FlocklyHome({ onViewEvent }) {
   const [showProfile, setShowProfile] = useState(false);
   const [user, setUser] = useState(null);
   const [events, setEvents] = useState([]);
@@ -49,8 +49,7 @@ export default function FlocklyHome() {
   };
 
   const handleViewEvent = (eventId) => {
-    console.log("Viewing event:", eventId);
-    alert(`Viewing event: ${eventId}`);
+    onViewEvent(eventId);
   };
 
   const getInitials = (name) => {
@@ -220,7 +219,7 @@ export default function FlocklyHome() {
 
                 {/* Overlay text & buttons */}
                 <div className="absolute inset-0 flex justify-between items-center px-6">
-                  {/* ✅ Visible Event Name */}
+                  {/* Event Name */}
                   <span className="text-white font-extrabold text-lg tracking-wide z-10 drop-shadow-lg">
                     {event.eventName}
                   </span>
@@ -235,7 +234,7 @@ export default function FlocklyHome() {
                       {full ? "Full" : `₹${event.price}`}
                     </span>
 
-                    {/* ✅ View Event Button */}
+                    {/* View Event Button */}
                     <button
                       onClick={() => handleViewEvent(event._id)}
                       className="bg-white text-black px-4 py-2 rounded-md font-semibold hover:bg-gray-200 transition"

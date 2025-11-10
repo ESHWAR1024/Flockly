@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 
-export default function ViewEvent() {
-  const { id } = useParams();
+export default function ViewEvent({ eventId, onBack }) {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/events/${id}`)
+    fetch(`http://localhost:5000/api/events/${eventId}`)
       .then((res) => res.json())
       .then((data) => {
+        console.log("Event data:", data);
+        console.log("Event image URL:", data.event?.image);
         setEvent(data.event);
         setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching event:", error);
+        setLoading(false);
       });
-  }, [id]);
+  }, [eventId]);
 
   if (loading) return <p className="text-white text-center mt-10 text-xl">Loading...</p>;
   if (!event) return <p className="text-red-500 text-center mt-10 text-xl">Event not found.</p>;
@@ -22,7 +26,7 @@ export default function ViewEvent() {
     <>
       {/* FIXED BACK BUTTON */}
       <button
-        onClick={() => window.history.back()}
+        onClick={onBack}
         className="fixed top-6 left-6 bg-white text-black px-5 py-2 rounded-xl font-semibold shadow-lg border border-gray-300 hover:bg-gray-200 transition z-[99999]"
       >
         ← Back
@@ -35,6 +39,7 @@ export default function ViewEvent() {
           <div className="md:w-1/2 flex justify-center">
             <img
               src={event.image}
+              alt={event.eventName}
               className="w-full max-h-[350px] rounded-3xl border-4 border-black object-cover"
             />
           </div>
