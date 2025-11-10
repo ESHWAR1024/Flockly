@@ -6,6 +6,7 @@ const passport = require('passport');
 require('dotenv').config();
 
 const Event = require('./models/Event'); // Import Event model
+const Registration = require('./models/Registration'); // Import Registration model
 
 const app = express();
 
@@ -17,7 +18,8 @@ app.use(cors({
   origin: process.env.CLIENT_URL,
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -264,6 +266,92 @@ app.get('/api/events', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch events',
+      error: error.message
+    });
+  }
+});
+
+// ==================== REGISTRATION ROUTES ====================
+
+// Create new registration
+app.post('/api/registrations', async (req, res) => {
+  try {
+    const { eventId, name, email, phoneNumber, transactionScreenshot } = req.body;
+
+    // Check if event exists
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: 'Event not found'
+      });
+    }
+
+    // Check if event is full
+    if (event.registeredCount >= event.capacity) {
+      return res.status(400).json({
+        success: false,
+        message: 'Sorry, this event is full. Registration is closed.'
+      });
+    }
+
+    // Check if user already registered for this event
+    const existingRegistration = await Registration.findOne({ 
+      eventId, 
+      email: email.toLowerCase() 
+    });
+    
+    if (existingRegistration) {
+      return res.status(400).json({
+        success: false,
+        message: 'You have already registered for this event'
+      });
+    }
+
+    // Create registration
+    const registration = await Registration.create({
+      eventId,
+      name,
+      email,
+      phoneNumber,
+      transactionScreenshot
+    });
+
+    // Update event registered count
+    event.registeredCount = (event.registeredCount || 0) + 1;
+    await event.save();
+
+    console.log('✅ Registration created:', registration);
+    
+    res.status(201).json({
+      success: true,
+      message: 'Registration successful',
+      registration
+    });
+  } catch (error) {
+    console.error('❌ Error creating registration:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create registration',
+      error: error.message
+    });
+  }
+});
+
+// Get all registrations for an event (Manager only)
+app.get('/api/registrations/event/:eventId', isAuthenticated, isManager, async (req, res) => {
+  try {
+    const registrations = await Registration.find({ eventId: req.params.eventId }).sort({ registeredAt: -1 });
+    
+    res.json({
+      success: true,
+      registrations
+    });
+  } catch (error) {
+    console.error('❌ Error fetching registrations:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch registrations',
       error: error.message
     });
   }

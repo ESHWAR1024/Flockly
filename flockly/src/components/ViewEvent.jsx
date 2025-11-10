@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from "react";
 
-export default function ViewEvent({ eventId, onBack }) {
+export default function ViewEvent({ eventId, onBack, onRegister }) {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState("");
+  const [hasRegistered, setHasRegistered] = useState(false);
 
   useEffect(() => {
+    // Check if user has already registered for this event
+    const registered = localStorage.getItem(`registered_${eventId}`);
+    if (registered === "true") {
+      setHasRegistered(true);
+    }
+
     fetch(`http://localhost:5000/api/events/${eventId}`)
       .then((res) => res.json())
       .then((data) => {
@@ -65,6 +73,23 @@ export default function ViewEvent({ eventId, onBack }) {
             <p className="mb-3">
               <strong>Registered:</strong> {event.registeredCount}
             </p>
+
+            {hasRegistered ? (
+              <div className="w-full mt-6 bg-gray-300 text-gray-600 py-3 rounded-xl font-bold text-lg text-center">
+                Already Registered ✓
+              </div>
+            ) : event.registeredCount >= event.capacity ? (
+              <div className="w-full mt-6 bg-red-500 text-white py-3 rounded-xl font-bold text-lg text-center">
+                Event Full - Registration Closed
+              </div>
+            ) : (
+              <button
+                onClick={() => onRegister(eventId)}
+                className="w-full mt-6 bg-black text-white py-3 rounded-xl font-bold text-lg hover:bg-gray-800 transition"
+              >
+                Register Now
+              </button>
+            )}
           </div>
         </div>
       </div>

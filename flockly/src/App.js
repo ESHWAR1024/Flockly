@@ -3,6 +3,7 @@ import FlocklyLogin from './FlocklyLogin';
 import FlocklyManagerHome from './FlocklyManagerHome';
 import FlocklyUserHome from './FlocklyUserHome';
 import ViewEvent from './components/ViewEvent';
+import RegisterEvent from './components/RegisterEvent';
 import { authService } from './services/api';
 
 function App() {
@@ -46,7 +47,17 @@ function App() {
     setCurrentView('viewEvent');
   };
 
+  const handleRegisterEvent = (eventId) => {
+    setSelectedEventId(eventId);
+    setCurrentView('registerEvent');
+  };
+
   const handleBackToHome = () => {
+    setCurrentView('home');
+    setSelectedEventId(null);
+  };
+
+  const handleRegistrationSuccess = () => {
     setCurrentView('home');
     setSelectedEventId(null);
   };
@@ -61,7 +72,12 @@ function App() {
 
   // If viewing an event
   if (currentView === 'viewEvent' && selectedEventId) {
-    return <ViewEvent eventId={selectedEventId} onBack={handleBackToHome} />;
+    return <ViewEvent eventId={selectedEventId} onBack={handleBackToHome} onRegister={handleRegisterEvent} />;
+  }
+
+  // If registering for an event
+  if (currentView === 'registerEvent' && selectedEventId) {
+    return <RegisterEvent eventId={selectedEventId} onBack={handleBackToHome} onSuccess={handleRegistrationSuccess} />;
   }
 
   return (
