@@ -173,10 +173,7 @@ export default function FlocklyHome({ onViewEvent }) {
           </h2>
         </div>
 
-        <nav className="flex items-center space-x-8 text-lg uppercase tracking-wide">
-          <a href="#" className="hover:text-gray-400 transition">Home</a>
-          <a href="#" className="hover:text-gray-400 transition">Events</a>
-          <a href="#" className="hover:text-gray-400 transition">Contact</a>
+       
 
           <div className="relative">
             <button onClick={() => setShowProfile(!showProfile)} className="rounded-full hover:opacity-80 transition">
@@ -219,7 +216,7 @@ export default function FlocklyHome({ onViewEvent }) {
               </div>
             )}
           </div>
-        </nav>
+       
       </div>
 
       {/* Main heading */}
